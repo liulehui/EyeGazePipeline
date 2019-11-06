@@ -43,7 +43,9 @@ class Observer:
 
     def __del__(self):
         # self.cap0.release()
-        self.eyegaze_process.shutdown()
+        # if self.eyegaze_process is not None:
+        #     self.eyegaze_process.shutdown()
+        pass
 
     def one_screenshot(self):
         '''
@@ -52,7 +54,7 @@ class Observer:
         :return:
         '''
         timestamp = str(time.time())
-        path = self.base_dir + '/' + timestamp + '.jpeg'
+        path = self.base_dir + '\\' + timestamp + ".jpeg"
         # ret0, mycapture = self.cap0.read()
         mycapture = pyautogui.screenshot()
         mycapture = cv2.cvtColor(np.array(mycapture), cv2.COLOR_RGB2BGR)
@@ -101,15 +103,16 @@ class Observer:
 
             time.sleep(time_to_sleep)
 
-    def run_eyegaze(self, eyegaze):
+    @staticmethod
+    def run_eyegaze():
+        eyegaze = Eyegaze()
         eyegaze.run()
 
     def run(self, time_control: TimeControl, use_eyegaze=False):
 
         # open a new process to run the eyegaze program
         if use_eyegaze is True:
-            eyegaze = Eyegaze()
-            self.eyegaze_process = multiprocessing.Process(target=self.run_eyegaze, args=(eyegaze,))
+            self.eyegaze_process = multiprocessing.Process(target=self.run_eyegaze, args=())
             self.eyegaze_process.start()
             print(self.eyegaze_process.pid)
 
@@ -117,7 +120,7 @@ class Observer:
 
 
 if __name__ == '__main__':
-    observer = Observer('/Users/weixin/Desktop/EyeGazePipeline/data/screenshot')
+    observer = Observer("C:\\Users\\zhangzhida\\Desktop\\EyeGazePipeline\\data\\screenshot")
     # time control on screenshot
     time_control = TimeControl(batch_num=2, batch_interval=3, unit_num=2, unit_interval=0.1)
 
