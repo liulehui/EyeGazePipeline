@@ -5,9 +5,11 @@ import numpy as np
 import threading
 import sys
 import os
+import multiprocessing
 
 from publisher import Publisher
 from face_detector import FaceDetector
+from eyegaze import Eyegaze
 
 class TimeControl:
     '''
@@ -36,10 +38,12 @@ class Observer:
         self.base_dir = base_dir
         self.csv_filename = 'screenshot_list.csv'
         self.face_detector = FaceDetector()
-        self.cap0 = cv2.VideoCapture(0)
+        # self.cap0 = cv2.VideoCapture(0)
+        self.eyegaze_process = None
 
     def __del__(self):
-        self.cap0.release()
+        # self.cap0.release()
+        self.eyegaze_process.shutdown()
 
     def one_screenshot(self):
         '''
@@ -49,7 +53,9 @@ class Observer:
         '''
         timestamp = str(time.time())
         path = self.base_dir + '/' + timestamp + '.jpeg'
-        ret0, mycapture = self.cap0.read()
+        # ret0, mycapture = self.cap0.read()
+        mycapture = pyautogui.screenshot()
+        mycapture = cv2.cvtColor(np.array(mycapture), cv2.COLOR_RGB2BGR)
 
         # cv2.imwrite(path, img)
         print('saved to ' + path + " at " + timestamp)
@@ -80,7 +86,11 @@ class Observer:
             for j in range(time_control.unit_num):
                 # self.one_screenshot()
                 unit_start_time = time.time()
-                threading.Thread(target=self.one_screenshot(), args=(), daemon=True)
+
+                # threading.Thread(target=self.one_screenshot(), args=(), daemon=True)
+                p1 = multiprocessing.Process(target=self.one_screenshot(), args=(), daemon=True)
+                p1.start()
+
                 unit_end_time = time.time()
 
                 time_to_sleep = max(0, time_control.unit_interval - unit_end_time + unit_start_time)
@@ -91,13 +101,24 @@ class Observer:
 
             time.sleep(time_to_sleep)
 
-    def run(self, time_control: TimeControl):
+    def run_eyegaze(self, eyegaze):
+        eyegaze.run()
+
+    def run(self, time_control: TimeControl, use_eyegaze=False):
+
+        # open a new process to run the eyegaze program
+        if use_eyegaze is True:
+            eyegaze = Eyegaze()
+            self.eyegaze_process = multiprocessing.Process(target=self.run_eyegaze, args=(eyegaze,))
+            self.eyegaze_process.start()
+            print(self.eyegaze_process.pid)
+
         self.screenshots(time_control)
 
 
 if __name__ == '__main__':
     observer = Observer('/Users/weixin/Desktop/EyeGazePipeline/data/screenshot')
     # time control on screenshot
-    time_control = TimeControl(batch_num=-1, batch_interval=2, unit_num=2, unit_interval=0.1)
+    time_control = TimeControl(batch_num=2, batch_interval=3, unit_num=2, unit_interval=0.1)
 
-    observer.run(time_control)
+    observer.run(time_control, use_eyegaze=True)

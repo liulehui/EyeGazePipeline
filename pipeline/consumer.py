@@ -18,6 +18,8 @@ class Consumer:
         
         model predict code here.
         
+        write to csv
+        
         '''
         print(" Run model predict here. \n")
 
