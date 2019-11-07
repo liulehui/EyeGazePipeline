@@ -111,8 +111,12 @@ class Observer:
 
     @staticmethod
     def run_eyegaze():
-        eyegaze = Eyegaze()
-        eyegaze.run()
+        HOST = '127.0.0.1'
+        PORT = 4242
+        base_dir = "C:\\Users\\zhangzhida\\Desktop\\EyeGazePipeline\\data\\" # this shoud be changed in Mac
+
+        eyegaze = Eyegaze(HOST, PORT, base_dir)
+        eyegaze.run_gazepoint()
 
     def run(self, time_control: TimeControl, use_eyegaze=False):
 
@@ -132,4 +136,5 @@ if __name__ == '__main__':
     # time control on screenshot
     time_control = TimeControl(batch_num=2, batch_interval=5, unit_num=5, unit_interval=0.1)
 
-    observer.run(time_control, use_eyegaze=False)
+    observer.run(time_control, use_eyegaze=True) # default is False
+
