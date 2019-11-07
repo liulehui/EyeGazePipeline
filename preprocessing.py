@@ -16,7 +16,7 @@ class DataProcess(object):
     def __init__(self,
                  out_rows,
                  out_cols,
-                 data_path="./data/top_bottom/",
+                 data_path="./data/",
                  img_type="png"):
 
         """
@@ -53,3 +53,5 @@ if __name__ == "__main__":
     mydata = DataProcess(config.image_size, config.image_size)
     mydata.train_val_split('top')
     mydata.train_val_split('bottom')
+
+

@@ -1,5 +1,9 @@
 import pika
 
+from predictor import Predictor
+import time
+import os
+
 class Consumer:
 
     def __init__(self):
@@ -21,6 +25,23 @@ class Consumer:
         write to csv
         
         '''
+        predictor = Predictor()
+
+        face_img_path = body
+        if not os.path.exists(face_img_path):
+            print("face path not exist.")
+            return
+
+        with open(face_img_path, 'rb') as f:
+            image_bytes = f.read()
+
+            print("inference:")
+            start_time = time.time()
+            label = predictor.predict(image_bytes)
+            end_time = time.time()
+            inference_latency = end_time - start_time
+            print("label = " + str(label) + ", " + str(inference_latency))
+
         print(" Run model predict here. \n")
 
     def run(self):
