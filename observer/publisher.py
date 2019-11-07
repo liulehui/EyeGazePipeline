@@ -1,3 +1,4 @@
+# coding:utf-8
 import pika
 
 class Publisher:
@@ -16,8 +17,6 @@ class Publisher:
                               routing_key='hello',
                               body=body)
         print(" [x] Sent '" + str(body) + "'")
-
-
 
 
 
