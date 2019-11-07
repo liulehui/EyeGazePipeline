@@ -71,7 +71,6 @@ class Observer:
 
         # publish message
         self.publisher.publish(face_filename)
-
         # return [path]
 
     def _write_to_csv(self, csv_filename, path, timestamp):
@@ -105,8 +104,12 @@ class Observer:
 
     @staticmethod
     def run_eyegaze():
-        eyegaze = Eyegaze()
-        eyegaze.run()
+        HOST = '127.0.0.1'
+        PORT = 4242
+        base_dir = "C:\\Users\\zhangzhida\\Desktop\\EyeGazePipeline\\data\\"
+
+        eyegaze = Eyegaze(HOST, PORT, base_dir)
+        eyegaze.run_gazepoint()
 
     def run(self, time_control: TimeControl, use_eyegaze=False):
 
