@@ -5,3 +5,8 @@
 .ipynb_checkpoints*
 __pycache__*
 */__pycache__/
+/DataCollection/face0/*
+/DataCollection/face1/*
+/DataCollection/preparation/*
+/DataCollection/*.csv
+/pipeline/*.csv
