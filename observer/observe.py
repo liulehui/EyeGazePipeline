@@ -1,4 +1,5 @@
 import pyautogui
+import pandas as pd
 import time
 import cv2
 import numpy as np
@@ -38,15 +39,17 @@ class Observer:
         self.base_dir = base_dir
         self.csv_filename = 'screenshot_list.csv'
         self.face_detector = FaceDetector()
-        self.cap0 = cv2.VideoCapture()
-        self.cap0.open(0)
+        # self.cap0 = cv2.VideoCapture()
+        # self.cap0.open(0)
+        self.cap = cv2.VideoCapture(1) # default is 0
         self.eyegaze_process = None
 
     def __del__(self):
         # self.cap0.release()
         # if self.eyegaze_process is not None:
         #     self.eyegaze_process.shutdown()
-        self.cap0.release()
+        self.cap.release()
+        cv2.destroyAllWindows()
 
     def one_screenshot(self):
         '''
@@ -55,9 +58,11 @@ class Observer:
         :return:
         '''
         timestamp = str(time.time())
-        face_img_path = self.base_dir + '/' + timestamp + ".jpeg"
+        # face_img_path = self.base_dir + '/' + timestamp + ".jpeg"
+        face_img_name = timestamp + ".jpeg"
+        face_img_path = os.path.join(self.base_dir, face_img_name)
 
-        ret0, mycapture = self.cap0.read()
+        ret0, mycapture = self.cap.read()
         # mycapture = pyautogui.screenshot()
         # mycapture = cv2.cvtColor(np.array(mycapture), cv2.COLOR_RGB2BGR)
 
@@ -69,21 +74,25 @@ class Observer:
         print('saved to ' + face_img_path + " at " + timestamp)
 
         # detect face
-        face_filename = "face_" + timestamp + ".jpeg"
-        self.face_detector.detect(mycapture, face_img_path)
+        face_flag = self.face_detector.detect(mycapture, face_img_path)
 
-        # write to csv
-        self._write_to_csv(self.csv_filename, face_img_path, timestamp)
 
-        # publish message
-        self.publisher.publish(face_img_path)
+        if face_flag:
+            print("write face_img to csv!")
+            # write to csv
+            self._write_to_csv(self.csv_filename, face_img_name, timestamp) # face_img_path
+            # publish message
+            self.publisher.publish(face_img_path)
 
         # return [path]
 
     def _write_to_csv(self, csv_filename, path, timestamp):
         if not os.path.exists(csv_filename):
-            file = open(csv_filename, 'w')
-            file.close()
+            # file = open(csv_filename, 'w')
+            # file.close()
+            df = pd.DataFrame(
+                columns=['img_name', 'time'])
+            df.to_csv(csv_filename, index=False)
 
         with open(csv_filename, 'a') as fd:
             fd.write(path + ',' + timestamp + '\n')
@@ -94,11 +103,9 @@ class Observer:
             for j in range(time_control.unit_num):
                 # self.one_screenshot()
                 unit_start_time = time.time()
-
                 # threading.Thread(target=self.one_screenshot(), args=(), daemon=True)
                 p1 = multiprocessing.Process(target=self.one_screenshot(), args=(), daemon=True)
                 p1.start()
-
                 unit_end_time = time.time()
 
                 time_to_sleep = max(0, time_control.unit_interval - unit_end_time + unit_start_time)
@@ -113,7 +120,8 @@ class Observer:
     def run_eyegaze():
         HOST = '127.0.0.1'
         PORT = 4242
-        base_dir = "C:\\Users\\zhangzhida\\Desktop\\EyeGazePipeline\\data\\" # this shoud be changed in Mac
+        base_dir = os.path.join(os.getcwd()) # , "data"
+        print(base_dir)
 
         eyegaze = Eyegaze(HOST, PORT, base_dir)
         eyegaze.run_gazepoint()
@@ -122,7 +130,7 @@ class Observer:
 
         # open a new process to run the eyegaze program
         if use_eyegaze is True:
-            self.eyegaze_process = multiprocessing.Process(target=self.run_eyegaze, args=())
+            self.eyegaze_process = multiprocessing.Process(target=self.run_eyegaze, args=(), daemon=True)
             self.eyegaze_process.start()
             print(self.eyegaze_process.pid)
 
@@ -130,11 +138,11 @@ class Observer:
 
 
 if __name__ == '__main__':
-    # filepath = "C:\\Users\\zhangzhida\\Desktop\\EyeGazePipeline\\data\\screenshot"
-    filepath = "/Users/weixin/Desktop/EyeGazePipeline/data/faces"
+    filepath = "C:\\Users\\zhangzhida\\Desktop\\EyeGazePipeline\\data\\screenshot"
+    # filepath = "/Users/weixin/Desktop/EyeGazePipeline/data/faces"
     observer = Observer(filepath)
     # time control on screenshot
-    time_control = TimeControl(batch_num=2, batch_interval=5, unit_num=5, unit_interval=0.1)
-
+    # batch_num = 2
+    time_control = TimeControl(batch_num=10, batch_interval=5, unit_num=5, unit_interval=0.1)
     observer.run(time_control, use_eyegaze=True) # default is False
 

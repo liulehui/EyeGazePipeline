@@ -19,9 +19,7 @@ class Consumer:
     def callback(self, ch, method, properties, body):
         print(" [x] Received %r" % body)
         '''
-        
         model predict code here.
-        
         write to csv
         
         '''
@@ -32,15 +30,18 @@ class Consumer:
             print("face path not exist.")
             return
 
+        img_name = str(body).split('\\')[-1]
+        # print(img_name)
         with open(face_img_path, 'rb') as f:
             image_bytes = f.read()
 
             print("inference:")
             start_time = time.time()
-            label = predictor.predict(image_bytes)
+            label = predictor.predict(image_bytes, img_name)
             end_time = time.time()
             inference_latency = end_time - start_time
             print("label = " + str(label) + ", " + str(inference_latency))
+
 
         print(" Run model predict here. \n")
 

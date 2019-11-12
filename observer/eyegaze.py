@@ -53,7 +53,8 @@ class Eyegaze:
         t_end = datetime.now() + timedelta(seconds = tot_sec)
 
 
-        csv_filename = self.base_dir + 'gaze_data.csv'
+        # csv_filename = self.base_dir + 'gaze_data.csv'
+        csv_filename = os.path.join(self.base_dir, 'gaze_data.csv')
         if not os.path.exists(csv_filename):
             df = pd.DataFrame(
                 columns=['Date', 'Time', 'FPOGID', 'FPOGD', 'FPOGX', 'FPOGY', 'LPOGX', 'LPOGY', 'RPOGX', 'RPOGY', 'CX',
@@ -107,7 +108,7 @@ class Eyegaze:
                 with open(csv_filename, 'a') as fd:
                     fd.write(new_row)
                 # df.to_csv(self.base_dir + 'gaze_data.csv', mode='a', index=False)
-                print("write new data to csv!")
+                # print("write new data to csv!")
 
         s.close()
         # df = df.fillna(method='ffill')
