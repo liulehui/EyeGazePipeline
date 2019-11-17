@@ -1,4 +1,4 @@
-import pyautogui
+# import pyautogui
 import pandas as pd
 import time
 import cv2
@@ -138,8 +138,9 @@ class Observer:
 
 
 if __name__ == '__main__':
-    filepath = "C:\\Users\\zhangzhida\\Desktop\\EyeGazePipeline\\data\\screenshot"
+    # filepath = "C:\\Users\\zhangzhida\\Desktop\\EyeGazePipeline\\data\\screenshot"
     # filepath = "/Users/weixin/Desktop/EyeGazePipeline/data/faces"
+    filepath = "/Users/raleighliu/Desktop/capstone/EyeGazePipeline/data"
     observer = Observer(filepath)
     # time control on screenshot
     # batch_num = 2
